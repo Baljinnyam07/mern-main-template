@@ -1,8 +1,11 @@
 import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Home(): JSX.Element {
-  const [counter, setCounter] = useState<number>(0);
+  const [movies, setMovies] = useState<any[] || >([])
+  const movies = ["Harry Potter", "Naruto", "One Piece"]
   return (
     <>
       <Head>
@@ -11,7 +14,23 @@ export default function Home(): JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <button onClick={(): void => setCounter(counter + 1)}>{counter}</button>
+      <div className="bg-slate-100 min-h-screen">
+        <div className="container mx-auto">
+          <div className="bg-white">
+            <div className="p-4 grid grid-cols-6 gap-4">
+              {movies.map((movie)=>(
+                <div key={movie} className="group">
+                  <div className="aspect-[16/23] relative group">
+                    <Image src="https://via.placeholder.com/160x230" alt={movie} width={160} height={230} className="w-full h-full object-cover rounded"/>
+                    <div className="absolute inset-0 group-hover:bg-black/30 transition-colors"></div>
+                  </div>
+                  <Link href={''} className="text-xs text-stone-800 group-hover:text-sky-300 transition-colors">{movie}</Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

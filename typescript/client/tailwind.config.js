@@ -8,7 +8,7 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: { aspectRatio:{"16/23":"16 / 23"} },
   },
   plugins: [],
 };
