@@ -1,11 +1,21 @@
+import { MovieCard } from "@/components/movie/MovieCard";
+import { IMovie } from "@/interfaces/movie";
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home(): JSX.Element {
-  const [movies, setMovies] = useState<any[] || >([])
-  const movies = ["Harry Potter", "Naruto", "One Piece"]
+  const [movies, setMovies] = useState<IMovie[]>([]);
+
+  const [ordering, setOrdering] = useState<string>("");
+
+  useEffect(() => {
+    fetch(`http://localhost:7070/api/movies?limit=12&ordering=${ordering}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setMovies(data);
+      });
+  }, [ordering]);
+
   return (
     <>
       <Head>
@@ -14,18 +24,26 @@ export default function Home(): JSX.Element {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <div className="bg-slate-100 min-h-screen">
         <div className="container mx-auto">
           <div className="bg-white">
+            <select
+              value={ordering}
+              onChange={(e): void => {
+                setOrdering(e.target.value);
+              }}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            >
+              <option value="releasedAsc">Oldest</option>
+              <option value="releasedDesc">Newest</option>
+              <option value="imdbRatingDesc">Most popular</option>
+              <option value="titleAsc">A-Z</option>
+              <option value="titleDesc">Z-A</option>
+            </select>
             <div className="p-4 grid grid-cols-6 gap-4">
-              {movies.map((movie)=>(
-                <div key={movie} className="group">
-                  <div className="aspect-[16/23] relative group">
-                    <Image src="https://via.placeholder.com/160x230" alt={movie} width={160} height={230} className="w-full h-full object-cover rounded"/>
-                    <div className="absolute inset-0 group-hover:bg-black/30 transition-colors"></div>
-                  </div>
-                  <Link href={''} className="text-xs text-stone-800 group-hover:text-sky-300 transition-colors">{movie}</Link>
-                </div>
+              {movies.map((movie) => (
+                <MovieCard movie={movie} key={movie._id} />
               ))}
             </div>
           </div>
