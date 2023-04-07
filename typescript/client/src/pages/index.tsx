@@ -1,24 +1,31 @@
 import { MovieCard } from "@/components/movie/MovieCard";
 import { IMovie } from "@/interfaces/movie";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useState,useEffect } from "react";
 
-export default function Home(): JSX.Element {
-  const [movies, setMovies] = useState<IMovie[]>([]);
+export async function getStaticProps(){
+  const response = await fetch(`http://localhost:7070/api/movies?limit=24`);
+  const data = await response.json();
+  return {
+    props: { movies: data},
+  };
+}
+
+export default function Home({movies: data}:{movies:IMovie[] }): JSX.Element {
+  const [movies, setMovies] = useState<IMovie[]>(data);
   const [ordering, setOrdering] = useState<string>("");
   const [q, setQ] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
+  // const [search, setSearch] = useState<string>("");
   
 
-
-
   useEffect(() => {
+    if(ordering !== "")
     fetch(`http://localhost:7070/api/movies?limit=100&ordering=${ordering}&q=${q}`)
       .then((res) => res.json())
       .then((data) => {
         setMovies(data);
       });
-  }, [ordering,search]);
+  }, [ordering,q]);
 
 
   return (
@@ -30,7 +37,7 @@ export default function Home(): JSX.Element {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container mx-auto"> 
-      <form>
+      
           <label className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">
             Search
           </label>
@@ -58,8 +65,8 @@ export default function Home(): JSX.Element {
               onChange={((e):void=>{
                 setQ(e.target.value)
               })}
-              onKeyDown={(e):void=>{
-                (e.key ==='Enter') ? setSearch(q): movies}}
+              // onKeyDown={(e):void=>{
+              //   (e.key ==='Enter') ? setSearch(q): movies}}
 
               
               id="default-search"
@@ -69,11 +76,29 @@ export default function Home(): JSX.Element {
             />
             
           </div>
-        </form>
+        
       <div className="bg-slate-100 min-h-screen">
 
         
           <div className="bg-white">
+            <label               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+>
+            Хуудаслалт &nbsp;
+            <select
+              className="form-control d-inline-block w-auto"
+              // onChange={(e) => {
+              //   setCurrentPage(1);
+              //   setPageSize(e.target.value);
+              // }}
+              // value={pageSize}
+            >
+              <option value="12">12</option>
+              <option value="24">24</option>
+              <option value="36">36</option>
+              <option value="48">48</option>
+              <option value="60">60</option>
+            </select>
+          </label>
             <select
               value={ordering}
               onChange={(e): void => {
@@ -87,7 +112,6 @@ export default function Home(): JSX.Element {
               <option value="titleAsc">A-Z</option>
               <option value="titleDesc">Z-A</option>
             </select>
-            <label>Search: {search}</label>
             <div className="p-4 grid grid-cols-6 gap-4">
               {movies.map((movie) => (
                 <MovieCard movie={movie} key={movie._id} />

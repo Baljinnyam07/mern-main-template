@@ -5,6 +5,11 @@ export const countAllMovies = async (req: Request, res: Response) => {
   res.json(await MovieModel.count({}));
 };
 
+export const findAllMovieIds = async (req:Request, res: Response)=>{
+  const result = await MovieModel.find().select({_id:1});
+  res.json(result.map((movieId)=>movieId._id))
+}
+
 export const findAllMovies = async (req: Request, res: Response) => {
   const { limit = "10", skip = "0", ordering = "releasedAsc", q="" } = req.query;
   let sort = "";
@@ -33,8 +38,15 @@ export const findAllMovies = async (req: Request, res: Response) => {
 };
 
 export const findMovieById = async (req: Request, res: Response) => {
-  const { _id } = req.params;
+  try{
+    const { _id } = req.params;
+  
+   if(_id){
+      const result: IMovie | null = await MovieModel.findById(_id);
+    res.json(result);
+   }
 
-  const result: IMovie | null = await MovieModel.findById(_id);
-  res.json(result);
+  }catch(e){
+    console.log(e)
+  }
 };
