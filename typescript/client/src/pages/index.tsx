@@ -1,7 +1,7 @@
 import { MovieCard } from "@/components/movie/MovieCard";
 import { IMovie } from "@/interfaces/movie";
 import Head from "next/head";
-import axios from "axois"
+import axios from "axios";
 import { useRouter } from "next/router";
 import { GetServerSidePropsContext } from "next";
 import useLoader from "@/hooks/useLoader";
@@ -122,7 +122,7 @@ export default function Home({data}:{data:IMovie[] }): JSX.Element {
               itemLabel={"label"}
             />
            
-            <div className="p-4 grid grid-cols-6 gap-4">
+            <div className="p-4 grid gap-4 md:grid-cols-6 sm:grid-cols-4 grid-cols-2">
             {!loading
                 ? movies.map((movie) => (
                     <MovieCard movie={movie} key={movie._id} />

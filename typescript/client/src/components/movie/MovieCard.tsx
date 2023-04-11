@@ -11,7 +11,7 @@ export const MovieCard: FC<MovieCardProps> = ({movie}) =>{
   const placeHolder = "https://via.placeholder.com/160x230";
     return (
         <div key={movie._id} className="group">
-                  <div className="aspect-[16/23] relative group">
+                  <div className="aspect-[16/23] relative">
                     <Image
                       src={movie.poster || placeHolder}
                       alt={movie.title}
