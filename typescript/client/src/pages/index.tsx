@@ -1,31 +1,40 @@
 import { MovieCard } from "@/components/movie/MovieCard";
 import { IMovie } from "@/interfaces/movie";
 import Head from "next/head";
-import { useState,useEffect } from "react";
+import axios from "axois"
+import { useRouter } from "next/router";
+import { GetServerSidePropsContext } from "next";
+import useLoader from "@/hooks/useLoader";
+import { Select } from "../components/ui/Select"
+import { MovieCardSkelton } from "../components/movie/MovieCardSkeleton";
+import { nanoid } from "nanoid";
+import { useQuery } from "@/hooks/useQuery";
+import { useState } from "react";
 
-export async function getStaticProps(){
-  const response = await fetch(`http://localhost:7070/api/movies?limit=24`);
-  const data = await response.json();
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const { query } = context;
+  const { ordering = "", limit = 24 } = query;
+  const response = await axios.get(
+    `http://localhost:7070/api/movies?limit=${limit}&ordering=${ordering}`
+  );
+  const { data } = response;
   return {
-    props: { movies: data},
+    props: { data },
   };
 }
 
-export default function Home({movies: data}:{movies:IMovie[] }): JSX.Element {
-  const [movies, setMovies] = useState<IMovie[]>(data);
-  const [ordering, setOrdering] = useState<string>("");
+export default function Home({data}:{data:IMovie[] }): JSX.Element {
+  const movies = data;
+
+  const router = useRouter();
+  const { query } = router;
+  const { ordering = "", limit = 24 } = query;
+
+  const loading = useLoader();
+  const { addQuery } = useQuery();
   const [q, setQ] = useState<string>("");
   // const [search, setSearch] = useState<string>("");
   
-
-  useEffect(() => {
-    if(ordering !== "")
-    fetch(`http://localhost:7070/api/movies?limit=100&ordering=${ordering}&q=${q}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setMovies(data);
-      });
-  }, [ordering,q]);
 
 
   return (
@@ -81,41 +90,46 @@ export default function Home({movies: data}:{movies:IMovie[] }): JSX.Element {
 
         
           <div className="bg-white">
-            <label               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
->
-            Хуудаслалт &nbsp;
-            <select
-              className="form-control d-inline-block w-auto"
-              // onChange={(e) => {
-              //   setCurrentPage(1);
-              //   setPageSize(e.target.value);
-              // }}
-              // value={pageSize}
-            >
-              <option value="12">12</option>
-              <option value="24">24</option>
-              <option value="36">36</option>
-              <option value="48">48</option>
-              <option value="60">60</option>
-            </select>
-          </label>
-            <select
-              value={ordering}
-              onChange={(e): void => {
-                setOrdering(e.target.value);
+          <Select
+              items={[
+                { value: "", label: "Sort..." },
+                { value: "releasedAsc", label: "Oldest" },
+                { value: "releasedDesc", label: "Newest" },
+                { value: "imdbRatingDesc", label: "Most popular" },
+                { value: "titleAsc", label: "A-Z" },
+                { value: "titleDesc", label: "Z-A" },
+              ]}
+              onChange={(e) => {
+                addQuery({ ordering: e.target.value });
               }}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              <option value="releasedAsc">Oldest</option>
-              <option value="releasedDesc">Newest</option>
-              <option value="imdbRatingDesc">Most popular</option>
-              <option value="titleAsc">A-Z</option>
-              <option value="titleDesc">Z-A</option>
-            </select>
+              value={ordering + ""}
+              itemValue={"value"}
+              itemLabel={"label"}
+            />
+
+            <Select
+              items={[
+                { value: "6", label: "6" },
+                { value: "12", label: "12" },
+                { value: "24", label: "24" },
+                { value: "48", label: "48" },
+              ]}
+              onChange={(e) => {
+                addQuery({ limit: e.target.value });
+              }}
+              value={limit + ""}
+              itemValue={"value"}
+              itemLabel={"label"}
+            />
+           
             <div className="p-4 grid grid-cols-6 gap-4">
-              {movies.map((movie) => (
-                <MovieCard movie={movie} key={movie._id} />
-              ))}
+            {!loading
+                ? movies.map((movie) => (
+                    <MovieCard movie={movie} key={movie._id} />
+                  ))
+                : Array.from(Array(limit), () => (
+                    <MovieCardSkelton key={nanoid()} />
+                  ))}
             </div>
           </div>
         </div>
